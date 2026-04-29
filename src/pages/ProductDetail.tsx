@@ -1,0 +1,106 @@
+import { Droplets, Feather, WashingMachine } from 'lucide-react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Button } from '../components/ui/Button'
+import { getProductBySlug } from '../data/products'
+
+export function ProductDetail() {
+  const { slug } = useParams()
+  const navigate = useNavigate()
+  const product = slug ? getProductBySlug(slug) : undefined
+
+  if (!product) {
+    return (
+      <div className="py-12 text-center">
+        <p className="mb-6 text-zinc-400">Este Gloomi no existe (aún).</p>
+        <div className="mx-auto max-w-xs">
+          <Button onClick={() => navigate('/tienda')}>Ir a la tienda</Button>
+        </div>
+      </div>
+    )
+  }
+
+  const editionLabel = `Gloomi No. ${String(product.editionNumber).padStart(2, '0')}`
+
+  const cta = (
+    <div id="adoptar">
+      <p className="mb-3 text-center text-lg font-semibold tabular-nums text-zinc-100 lg:text-left lg:text-2xl">
+        ${product.price.toFixed(2)}
+      </p>
+      <Button variant="cta" className="lg:max-w-none">
+        Adoptar
+      </Button>
+      <Link
+        to="/tienda"
+        className="mt-4 block text-center text-sm font-medium text-zinc-500 hover:text-zinc-200 lg:text-left"
+      >
+        ← Volver a la tienda
+      </Link>
+    </div>
+  )
+
+  return (
+    <div className="w-full pb-40 pt-4 sm:pt-6 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,480px)] lg:items-start lg:gap-12 lg:pb-12 xl:gap-16">
+      <div className="mb-6 lg:sticky lg:top-24 lg:mb-0">
+        <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950/40 ring-1 ring-[color:var(--color-gloom-violet-soft)]">
+          <div className="aspect-square max-h-[min(90vw,44rem)] bg-zinc-900 lg:max-h-none">
+            <img
+              src={product.image}
+              alt=""
+              width={800}
+              height={800}
+              className="h-full w-full object-cover contrast-[1.03]"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="min-w-0">
+        <p className="mb-1 text-center text-xs uppercase tracking-[0.28em] text-[color:var(--color-gloom-violet)] lg:text-left">
+          {editionLabel}
+        </p>
+        <h1 className="font-display mb-6 text-center text-3xl font-semibold tracking-wide sm:text-4xl lg:text-left">
+          {product.name}
+        </h1>
+
+        <section className="mb-8 text-left">
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-zinc-500">
+            La historia
+          </h2>
+          <p className="text-sm leading-relaxed text-zinc-300 sm:text-base">
+            {product.story}
+          </p>
+        </section>
+
+        <section className="mb-8 text-left lg:mb-10">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-500">
+            Material y origen
+          </h2>
+          <ul className="space-y-3 text-sm sm:text-base">
+            <li className="flex gap-3 text-zinc-300">
+              <Feather className="mt-0.5 h-5 w-5 shrink-0 text-zinc-500" />
+              <span>{product.materials}</span>
+            </li>
+            <li className="flex gap-3 border-l-2 border-[color:var(--color-gloom-accent-soft)] pl-4 text-zinc-300">
+              <span className="font-medium text-zinc-400">Prenda / upcycling:</span>
+              <span>{product.sourceGarment}</span>
+            </li>
+            <li className="flex gap-3 text-zinc-300">
+              <WashingMachine className="mt-0.5 h-5 w-5 shrink-0 text-zinc-500" />
+              <span>{product.care}</span>
+            </li>
+            <li className="flex gap-3 text-zinc-300">
+              <Droplets className="mt-0.5 h-5 w-5 shrink-0 text-zinc-500" />
+              <span>Evita perfumes fuertes cerca del relleno.</span>
+            </li>
+          </ul>
+        </section>
+
+        <div className="hidden lg:block lg:max-w-md">{cta}</div>
+      </div>
+
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-zinc-800 bg-[#0a0a0b]/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md lg:hidden">
+        <div className="mx-auto w-full max-w-7xl px-0 sm:px-2">{cta}</div>
+      </div>
+    </div>
+  )
+}

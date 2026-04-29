@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Cinzel', 'Times New Roman', serif;
+  --color-gloom: #0a0a0b;
+  --color-gloom-muted: #6b6b70;
+  --color-gloom-border: #2a2a2e;
+  --color-gloom-surface: #131316;
+  /* Estilo notas: negro / gris + acentos rojo y violeta */
+  --color-gloom-accent: #c9264a;
+  --color-gloom-accent-soft: rgb(201 38 74 / 0.28);
+  --color-gloom-accent-muted: rgb(120 18 38 / 0.55);
+  --color-gloom-violet: #8b5cf6;
+  --color-gloom-violet-soft: rgb(139 92 246 / 0.15);
+}
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+  body {
+    @apply m-0 min-h-dvh font-sans text-zinc-100;
+    background-color: #070708;
+    /* Capas: base oscura + rojos dramáticos (inferior / laterales) + violeta sutil arriba */
+    background-image:
+      radial-gradient(ellipse 130% 90% at 50% 108%, rgb(160 22 48 / 0.42), transparent 52%),
+      radial-gradient(ellipse 95% 70% at 85% 8%, rgb(140 28 52 / 0.22), transparent 48%),
+      radial-gradient(ellipse 75% 55% at 12% 30%, rgb(90 14 30 / 0.35), transparent 46%),
+      radial-gradient(ellipse 65% 50% at 75% 55%, rgb(110 18 42 / 0.14), transparent 42%),
+      linear-gradient(
+        165deg,
+        rgb(8 8 10) 0%,
+        rgb(14 9 12) 38%,
+        rgb(11 8 11) 65%,
+        rgb(16 10 13) 100%
+      ),
+      radial-gradient(ellipse 100% 70% at 50% -8%, rgb(65 55 78 / 0.35), transparent 56%);
+  }
+}
