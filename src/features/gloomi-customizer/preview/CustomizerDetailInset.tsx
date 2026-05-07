@@ -1,4 +1,4 @@
-import type { CharmKind, DetailFocus, EyeKind, HatKind } from './gloomiBearTypes'
+import type { CharmKind, DetailFocus, EyeKind, HatKind } from '../types'
 
 type Props = {
   eyeKind: EyeKind
@@ -79,6 +79,7 @@ function eyeLabel(k: EyeKind): string {
     heart: 'Corazón velvet',
     spiral: 'Espiral hipnótica',
     gem: 'Gema tallada',
+    button: 'Botones cosidos · Coraline',
   }
   return m[k]
 }
@@ -170,6 +171,25 @@ function EyeDetailArt({ kind }: { kind: EyeKind }) {
           <path d="M0,-28 L22,-8 L14,22 L-14,22 L-22,-8 Z" fill="#22d3ee" stroke="#67e8f9" strokeWidth="1.5" />
           <path d="M0,-28 L0,22 M-22,-8 L22,-8" stroke="#cffafe" strokeWidth="0.8" opacity="0.6" />
           <circle cx="0" cy="-6" r="4" fill="#fff" opacity="0.45" />
+        </g>
+      )
+    case 'button':
+      return (
+        <g transform="translate(50 52)">
+          <circle cx="-16" cy="0" r="14" fill="#171717" stroke="#52525b" strokeWidth="2" />
+          <circle cx="16" cy="0" r="14" fill="#171717" stroke="#52525b" strokeWidth="2" />
+          <circle cx="-18.5" cy="-3.5" r="2.8" fill="#09090b" />
+          <circle cx="-13.5" cy="-3.5" r="2.8" fill="#09090b" />
+          <circle cx="-18.5" cy="3.5" r="2.8" fill="#09090b" />
+          <circle cx="-13.5" cy="3.5" r="2.8" fill="#09090b" />
+          <circle cx="13.5" cy="-3.5" r="2.8" fill="#09090b" />
+          <circle cx="18.5" cy="-3.5" r="2.8" fill="#09090b" />
+          <circle cx="13.5" cy="3.5" r="2.8" fill="#09090b" />
+          <circle cx="18.5" cy="3.5" r="2.8" fill="#09090b" />
+          <line x1="-22" y1="-8" x2="-10" y2="8" stroke="#e4e4e7" strokeWidth={1.8} strokeLinecap="round" />
+          <line x1="-22" y1="8" x2="-10" y2="-8" stroke="#e4e4e7" strokeWidth={1.8} strokeLinecap="round" />
+          <line x1="10" y1="-8" x2="22" y2="8" stroke="#e4e4e7" strokeWidth={1.8} strokeLinecap="round" />
+          <line x1="10" y1="8" x2="22" y2="-8" stroke="#e4e4e7" strokeWidth={1.8} strokeLinecap="round" />
         </g>
       )
     default:
