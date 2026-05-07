@@ -3,9 +3,9 @@ import { HydratedDocument } from 'mongoose';
 
 export type ContactMessageDocument = HydratedDocument<ContactMessage>;
 
-/** Documentos del formulario de contacto en la colección manual `gloomi`. */
+/** Mensajes del formulario «Contáctanos» en la colección `contacts`. */
 @Schema({
-  collection: 'gloomi',
+  collection: 'contacts',
   timestamps: true,
 })
 export class ContactMessage {
