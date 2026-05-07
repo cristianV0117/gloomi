@@ -34,7 +34,16 @@ cd ../backend && npm install
 
 1. `cd backend && cp .env.example .env` y edita `MONGODB_URI`.
 2. Levanta Mongo local o usa [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
-3. Para definir **schemas**, usa `@Prop()` + `SchemaFactory` de Mongoose y registra el módulo con `MongooseModule.forFeature([{ name: X.name, schema: XSchema }])` (ver [Nest + Mongoose](https://docs.nestjs.com/techniques/mongodb)).
+3. **Comprobar conexión:** con la API en marcha, abre `GET /api/health` → debe mostrar `mongo: "connected"` y la base `gloomi`.
+4. **Contacto:** el front envía el formulario a `POST /api/contact` (JSON: `email`, `message`, opcionales `name`, `subject`). Los datos se guardan en la colección **`gloomi`** de la base configurada en `MONGODB_URI`.
+5. **Frontend:** `frontend/.env.example` → `VITE_API_URL` debe apuntar al backend (ej. `http://localhost:3000/api` en local). En Railway, define esa variable en el **servicio del front** en tiempo de build.
+
+### Variables útiles
+
+| Variable | Dónde | Uso |
+|----------|--------|-----|
+| `FRONTEND_ORIGINS` | backend | Orígenes CORS separados por coma |
+| `VITE_API_URL` | frontend (build) | URL base de la API con `/api` |
 
 ## GitHub
 

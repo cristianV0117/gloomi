@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ContactModule } from './contact/contact.module';
 
 const mongoUri =
   process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/gloomi';
@@ -11,6 +12,7 @@ const mongoUri =
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(mongoUri),
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [AppService],
