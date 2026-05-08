@@ -4,9 +4,19 @@ import { Button } from '../components/ui/Button'
 import { getProductBySlug } from '../data/products'
 
 export function ProductDetail() {
+  const instagramProfileUrl = 'https://www.instagram.com/gl0omi__/'
+  const instagramDirectUrl = 'https://ig.me/m/gl0omi__'
   const { slug } = useParams()
   const navigate = useNavigate()
   const product = slug ? getProductBySlug(slug) : undefined
+
+  function handleAdoptarClick() {
+    // Instagram no garantiza abrir DM en desktop; usamos el deep link oficial y fallback al perfil.
+    const opened = window.open(instagramDirectUrl, '_blank', 'noopener,noreferrer')
+    if (!opened) {
+      window.location.assign(instagramProfileUrl)
+    }
+  }
 
   if (!product) {
     return (
@@ -26,7 +36,7 @@ export function ProductDetail() {
       <p className="mb-3 text-center text-lg font-semibold tabular-nums text-zinc-100 lg:text-left lg:text-2xl">
         ${product.price.toFixed(2)}
       </p>
-      <Button variant="cta" className="lg:max-w-none">
+      <Button variant="cta" className="lg:max-w-none" onClick={handleAdoptarClick}>
         Adoptar
       </Button>
       <Link
