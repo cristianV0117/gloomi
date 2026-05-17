@@ -1,27 +1,78 @@
-import { Droplets, Feather, WashingMachine } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Droplets, Feather, WashingMachine } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
-import { getProductBySlug } from '../data/products'
+import type { Product } from '../data/products'
+import { resolveMediaUrl } from '../lib/api'
+import { formatCop, formatUsd } from '../lib/productUtils'
+import { fetchProductBySlug } from '../lib/productsApi'
 
 export function ProductDetail() {
   const instagramProfileUrl = 'https://www.instagram.com/gl0omi__/'
   const instagramDirectUrl = 'https://ig.me/m/gl0omi__'
   const { slug } = useParams()
   const navigate = useNavigate()
-  const product = slug ? getProductBySlug(slug) : undefined
+  const [product, setProduct] = useState<Product | null | undefined>(undefined)
+  const [error, setError] = useState<string | null>(null)
+  const [imgIndex, setImgIndex] = useState(0)
+
+  useEffect(() => {
+    if (!slug) {
+      setProduct(null)
+      return
+    }
+    let cancelled = false
+    setProduct(undefined)
+    setError(null)
+    setImgIndex(0)
+    fetchProductBySlug(slug)
+      .then((p) => {
+        if (!cancelled) setProduct(p)
+      })
+      .catch((e) => {
+        if (!cancelled) {
+          setError(
+            e instanceof Error ? e.message : 'No se pudo cargar el producto',
+          )
+          setProduct(null)
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [slug])
+
+  useEffect(() => {
+    setImgIndex(0)
+  }, [product?.slug])
+
+  const slides = product?.images?.length ? product.images : []
+  const activeSrc =
+    slides.length > 0
+      ? resolveMediaUrl(slides[Math.min(imgIndex, slides.length - 1)])
+      : ''
 
   function handleAdoptarClick() {
-    // Instagram no garantiza abrir DM en desktop; usamos el deep link oficial y fallback al perfil.
     const opened = window.open(instagramDirectUrl, '_blank', 'noopener,noreferrer')
     if (!opened) {
       window.location.assign(instagramProfileUrl)
     }
   }
 
-  if (!product) {
+  if (product === undefined) {
+    return (
+      <div className="py-12 text-center text-sm text-zinc-500">
+        Cargando…
+      </div>
+    )
+  }
+
+  if (error || !product) {
     return (
       <div className="py-12 text-center">
-        <p className="mb-6 text-zinc-400">Este Gloomi no existe (aún).</p>
+        <p className="mb-6 text-zinc-400">
+          {error ?? 'Este Gloomi no existe (aún).'}
+        </p>
         <div className="mx-auto max-w-xs">
           <Button onClick={() => navigate('/tienda')}>Ir a la tienda</Button>
         </div>
@@ -33,10 +84,11 @@ export function ProductDetail() {
 
   const cta = (
     <div id="adoptar">
-      <p className="mb-3 text-center text-lg font-semibold tabular-nums text-zinc-100 lg:text-left lg:text-2xl">
-        ${product.price.toFixed(2)}
-      </p>
-      <Button variant="cta" className="lg:max-w-none" onClick={handleAdoptarClick}>
+      <div className="mb-1 text-center text-lg font-semibold tabular-nums text-zinc-100 lg:text-left lg:text-2xl">
+        <p>{formatUsd(product.priceUsd)}</p>
+        <p className="text-sm font-medium text-zinc-400">{formatCop(product.priceCop)}</p>
+      </div>
+      <Button variant="cta" className="mt-2 lg:max-w-none" onClick={handleAdoptarClick}>
         Adoptar
       </Button>
       <Link
@@ -52,14 +104,49 @@ export function ProductDetail() {
     <div className="w-full pb-40 pt-4 sm:pt-6 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,480px)] lg:items-start lg:gap-12 lg:pb-12 xl:gap-16">
       <div className="mb-6 lg:sticky lg:top-24 lg:mb-0">
         <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950/40 ring-1 ring-[color:var(--color-gloom-violet-soft)]">
-          <div className="aspect-square max-h-[min(90vw,44rem)] bg-zinc-900 lg:max-h-none">
-            <img
-              src={product.image}
-              alt=""
-              width={800}
-              height={800}
-              className="h-full w-full object-cover contrast-[1.03]"
-            />
+          <div className="relative aspect-square max-h-[min(90vw,44rem)] bg-zinc-900 lg:max-h-none">
+            {activeSrc ? (
+              <img
+                src={activeSrc}
+                alt=""
+                width={800}
+                height={800}
+                className="h-full w-full object-cover contrast-[1.03]"
+              />
+            ) : null}
+            {slides.length > 1 ? (
+              <>
+                <button
+                  type="button"
+                  aria-label="Imagen anterior"
+                  className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white backdrop-blur hover:bg-black/75"
+                  onClick={() =>
+                    setImgIndex((i) => (i - 1 + slides.length) % slides.length)
+                  }
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Imagen siguiente"
+                  className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white backdrop-blur hover:bg-black/75"
+                  onClick={() => setImgIndex((i) => (i + 1) % slides.length)}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+                <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                  {slides.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      aria-label={`Ver foto ${i + 1}`}
+                      className={`h-2 w-2 rounded-full transition ${i === imgIndex ? 'bg-white' : 'bg-white/35 hover:bg-white/55'}`}
+                      onClick={() => setImgIndex(i)}
+                    />
+                  ))}
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
       </div>

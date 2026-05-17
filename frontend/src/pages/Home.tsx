@@ -1,14 +1,41 @@
 import { Link } from 'react-router-dom'
 import { Plus } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { ProductCard } from '../components/ProductCard'
-import { products } from '../data/products'
+import { resolveMediaUrl } from '../lib/api'
+import type { Product } from '../data/products'
+import { fetchHomePublic } from '../lib/homeApi'
 
-/** Editorial / dramático: plush oscuro, alto contraste */
-const heroBg =
+const fallbackHero =
   'https://picsum.photos/seed/gloomi-hero-editorial/1400/900?grayscale'
 
 export function Home() {
-  const featured = products.slice(0, 3)
+  const [heroUrl, setHeroUrl] = useState<string | null>(null)
+  const [featured, setFeatured] = useState<(Product | null)[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    fetchHomePublic()
+      .then((data) => {
+        if (!cancelled) {
+          setHeroUrl(
+            data.heroImageUrl ? resolveMediaUrl(data.heroImageUrl) : null,
+          )
+          setFeatured(data.featuredProducts)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setHeroUrl(null)
+          setFeatured([])
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const heroBg = heroUrl || fallbackHero
 
   return (
     <div className="w-full">
@@ -60,16 +87,31 @@ export function Home() {
           </Link>
         </div>
         <div className="flex gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible xl:gap-8 [&::-webkit-scrollbar]:hidden">
-          {featured.map((p) => (
-            <ProductCard
-              key={p.slug}
-              slug={p.slug}
-              name={p.name}
-              price={p.price}
-              image={p.image}
-              compact
-            />
-          ))}
+          {featured.length === 0
+            ? [0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-64 min-w-[220px] animate-pulse rounded-2xl bg-zinc-900 lg:min-w-0"
+                />
+              ))
+            : featured.map((p, i) =>
+                p ? (
+                  <ProductCard
+                    key={p.slug}
+                    slug={p.slug}
+                    name={p.name}
+                    product={p}
+                    compact
+                  />
+                ) : (
+                  <div
+                    key={`empty-${i}`}
+                    className="flex h-64 min-w-[220px] items-center justify-center rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/40 text-center text-xs text-zinc-600 lg:min-w-0"
+                  >
+                    Cupo libre en destacados
+                  </div>
+                ),
+              )}
         </div>
       </section>
 
@@ -78,34 +120,24 @@ export function Home() {
           Preview comunidad
         </h2>
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/60 px-5 py-6 sm:px-8 lg:px-12">
-          <div className="mb-5 flex flex-wrap justify-center gap-3 sm:gap-4 lg:justify-center lg:gap-5">
-            {['a', 'b', 'c', 'd', 'e'].map((seed) => (
-              <span
-                key={seed}
-                className="h-12 w-12 overflow-hidden rounded-full border border-zinc-700 ring-1 ring-[color:var(--color-gloom-violet-soft)] sm:h-14 sm:w-14"
-              >
-                <img
-                  src={`https://picsum.photos/seed/cm-${seed}/128/128?grayscale`}
-                  alt=""
-                  width={128}
-                  height={128}
-                  className="h-full w-full object-cover"
-                />
-              </span>
-            ))}
-            <button
-              type="button"
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-zinc-600 text-zinc-500 hover:border-[color:var(--color-gloom-accent)] hover:text-zinc-200 sm:h-14 sm:w-14"
-              aria-label="Unirse a la comunidad"
-            >
-              <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
-            </button>
-          </div>
-          <p className="font-display text-center text-sm tracking-[0.2em] text-zinc-400 sm:text-base">
-            <span className="text-[color:var(--color-gloom-accent)]">#AdoptaTuGloomi</span>
-            <span className="mx-2 text-zinc-600">·</span>
-            <span className="text-zinc-500">#GloomiGang</span>
+          <p className="mx-auto max-w-xl text-center text-sm leading-relaxed text-zinc-400">
+            Pronto podrás compartir tu Gloomi custom con hashtags y aparecer aquí. Mientras tanto, explora la tienda o personaliza el tuyo.
           </p>
+          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
+            <Link
+              to="/personalizar"
+              className="inline-flex items-center gap-2 rounded-2xl border border-zinc-700 px-5 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-[color:var(--color-gloom-violet)] hover:text-white"
+            >
+              <Plus className="h-4 w-4" aria-hidden />
+              Personalizar
+            </Link>
+            <Link
+              to="/comunidad"
+              className="text-sm text-zinc-500 underline-offset-4 hover:text-zinc-300 hover:underline"
+            >
+              Ir a comunidad
+            </Link>
+          </div>
         </div>
       </section>
     </div>

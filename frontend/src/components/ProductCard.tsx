@@ -1,27 +1,28 @@
 import { Link } from 'react-router-dom'
 import { Heart } from 'lucide-react'
+import { resolveMediaUrl } from '../lib/api'
+import { formatCop, formatUsd, getPrimaryImage } from '../lib/productUtils'
+import type { Product } from '../data/products'
 
 type Props = {
   slug: string
   name: string
-  price: number
-  image: string
+  product: Pick<Product, 'images' | 'priceUsd' | 'priceCop'>
   showFavorite?: boolean
   compact?: boolean
-  /** Catálogo tienda: botones Ver historia / Adoptar */
   shopActions?: boolean
 }
 
 export function ProductCard({
   slug,
   name,
-  price,
-  image,
+  product,
   showFavorite = true,
   compact = false,
   shopActions = false,
 }: Props) {
   const detailPath = `/tienda/${slug}`
+  const img = getPrimaryImage(product)
 
   return (
     <article
@@ -30,7 +31,7 @@ export function ProductCard({
       <Link to={detailPath} className="block">
         <div className="aspect-square bg-zinc-900">
           <img
-            src={image}
+            src={resolveMediaUrl(img)}
             alt=""
             width={400}
             height={400}
@@ -46,13 +47,17 @@ export function ProductCard({
               <h3 className="truncate font-medium text-zinc-100 hover:text-white">{name}</h3>
             </Link>
             {!compact && (
-              <p className="text-sm tabular-nums text-zinc-400">${price.toFixed(2)}</p>
+              <div className="mt-0.5 space-y-0.5 text-sm tabular-nums text-zinc-400">
+                <p>{formatUsd(product.priceUsd)}</p>
+                <p className="text-xs text-zinc-500">{formatCop(product.priceCop)}</p>
+              </div>
             )}
           </div>
           {compact && (
-            <span className="shrink-0 text-sm tabular-nums text-zinc-400">
-              ${price.toFixed(2)}
-            </span>
+            <div className="shrink-0 text-right text-sm tabular-nums text-zinc-400">
+              <p>{formatUsd(product.priceUsd)}</p>
+              <p className="text-[11px] text-zinc-500">{formatCop(product.priceCop)}</p>
+            </div>
           )}
         </div>
 

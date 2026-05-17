@@ -1,10 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 import { AppModule } from './app.module';
+import { ensureUploadSubdir } from './uploads/multer-options';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  ensureUploadSubdir('products');
+  ensureUploadSubdir('branding');
+  ensureUploadSubdir('home');
+
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.setGlobalPrefix('api');
+
+  app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads/' });
 
   const frontendOrigins =
     process.env.FRONTEND_ORIGINS?.split(',')
@@ -14,8 +23,8 @@ async function bootstrap() {
 
   app.enableCors({
     origin: frontendOrigins,
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   app.useGlobalPipes(

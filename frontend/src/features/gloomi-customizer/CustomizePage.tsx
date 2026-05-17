@@ -1,5 +1,5 @@
 import { Box, ChevronDown, PenLine } from 'lucide-react'
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import {
   ACCESSORY_GROUPS,
@@ -15,12 +15,19 @@ import {
 import type { CharmKind, HatKind, TailAccentKind, WingKind } from './types'
 import { CustomizerDetailInset } from './preview/CustomizerDetailInset'
 import { GloomiVector } from './preview/GloomiVector'
+import { buildSavedGloomiConfig } from './savedConfig'
 import { useGloomiCustomizer } from './useGloomiCustomizer'
+import { submitGloomiCustomization } from '../../lib/inquiriesApi'
 
 const GloomiBear3D = lazy(async () => {
   const m = await import('./preview/GloomiBear3D')
   return { default: m.GloomiBear3D }
 })
+
+function undefinedIfEmpty(s: string): string | undefined {
+  const t = s.trim()
+  return t ? t : undefined
+}
 
 const ALL_ACCESSORY_GROUPS = [...ACCESSORY_GROUPS, ...BACK_ACCESSORY_GROUPS]
 
@@ -57,6 +64,41 @@ export function CustomizePage() {
     fabricZones,
     fabricHexForInset,
   } = useGloomiCustomizer()
+
+  const [saveEmail, setSaveEmail] = useState('')
+  const [saveName, setSaveName] = useState('')
+  const [saveNote, setSaveNote] = useState('')
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>(
+    'idle',
+  )
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  async function handleSaveDesign() {
+    setSaveStatus('loading')
+    setSaveError(null)
+    try {
+      const config = buildSavedGloomiConfig({
+        creatureId,
+        fabricByZone,
+        eyeId,
+        hatId,
+        charmId,
+        wingKind,
+        tailAccentKind,
+        previewMode,
+      })
+      await submitGloomiCustomization({
+        email: undefinedIfEmpty(saveEmail),
+        name: undefinedIfEmpty(saveName),
+        note: undefinedIfEmpty(saveNote),
+        config,
+      })
+      setSaveStatus('ok')
+    } catch (e) {
+      setSaveStatus('error')
+      setSaveError(e instanceof Error ? e.message : 'No se pudo guardar el diseño.')
+    }
+  }
 
   return (
     <div className="w-full pt-6 lg:pt-10">
@@ -339,8 +381,83 @@ export function CustomizePage() {
             </div>
           </section>
 
-          <div className="mx-auto max-w-md pb-12 lg:mx-0 lg:max-w-sm">
-            <Button>Crear mi Gloomi</Button>
+          <div className="mx-auto max-w-md space-y-4 pb-12 lg:mx-0 lg:max-w-sm">
+            <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-zinc-600">
+              Guardar diseño
+            </p>
+            <p className="text-xs leading-relaxed text-zinc-500">
+              Opcional: deja datos para que podamos contactarte. Tu combinación se guarda tal como la ves
+              (3D y vector usan la misma configuración).
+            </p>
+            <div>
+              <label
+                htmlFor="save-name"
+                className="mb-1 block text-xs font-medium text-zinc-400"
+              >
+                Nombre <span className="text-zinc-600">(opcional)</span>
+              </label>
+              <input
+                id="save-name"
+                type="text"
+                value={saveName}
+                onChange={(ev) => setSaveName(ev.target.value)}
+                autoComplete="name"
+                maxLength={120}
+                className="w-full rounded-2xl border border-zinc-700 bg-zinc-950/80 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-500 focus:outline-none"
+                placeholder="Cómo te llamamos"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="save-email"
+                className="mb-1 block text-xs font-medium text-zinc-400"
+              >
+                Correo <span className="text-zinc-600">(opcional)</span>
+              </label>
+              <input
+                id="save-email"
+                type="email"
+                value={saveEmail}
+                onChange={(ev) => setSaveEmail(ev.target.value)}
+                autoComplete="email"
+                className="w-full rounded-2xl border border-zinc-700 bg-zinc-950/80 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-500 focus:outline-none"
+                placeholder="tu@correo.com"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="save-note"
+                className="mb-1 block text-xs font-medium text-zinc-400"
+              >
+                Nota al taller <span className="text-zinc-600">(opcional)</span>
+              </label>
+              <textarea
+                id="save-note"
+                rows={3}
+                value={saveNote}
+                onChange={(ev) => setSaveNote(ev.target.value)}
+                maxLength={1000}
+                className="w-full resize-y rounded-2xl border border-zinc-700 bg-zinc-950/80 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-500 focus:outline-none"
+                placeholder="Tallaje, fecha deseada, detalles extra…"
+              />
+            </div>
+            {saveStatus === 'ok' ? (
+              <p className="text-sm text-emerald-400" role="status">
+                Diseño guardado. Lo verás en el panel de administración.
+              </p>
+            ) : null}
+            {saveStatus === 'error' && saveError ? (
+              <p className="text-sm text-rose-400" role="alert">
+                {saveError}
+              </p>
+            ) : null}
+            <Button
+              type="button"
+              disabled={saveStatus === 'loading'}
+              onClick={() => void handleSaveDesign()}
+            >
+              {saveStatus === 'loading' ? 'Guardando…' : 'Guardar mi diseño'}
+            </Button>
           </div>
         </div>
       </div>

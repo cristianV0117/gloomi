@@ -1,13 +1,14 @@
 import { ChevronDown } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ProductCard } from '../components/ProductCard'
 import { Button } from '../components/ui/Button'
-import {
-  products,
-  type ProductColor,
-  type ProductSize,
-  type ProductStyle,
+import type {
+  Product,
+  ProductColor,
+  ProductSize,
+  ProductStyle,
 } from '../data/products'
+import { fetchProducts } from '../lib/productsApi'
 
 const COLOR_OPTS: Array<ProductColor | 'Todos'> = [
   'Todos',
@@ -26,10 +27,40 @@ const STYLE_OPTS: Array<ProductStyle | 'Todos'> = [
 const SIZE_OPTS: Array<ProductSize | 'Todos'> = ['Todos', 'S', 'M', 'L']
 
 export function Shop() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
   const [colorF, setColor] = useState<ProductColor | 'Todos'>('Todos')
   const [styleF, setStyle] = useState<ProductStyle | 'Todos'>('Todos')
   const [sizeF, setSize] = useState<ProductSize | 'Todos'>('Todos')
   const [visibleCount, setVisibleCount] = useState(8)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    fetchProducts()
+      .then((data) => {
+        if (!cancelled) {
+          setProducts(data)
+          setLoadError(null)
+        }
+      })
+      .catch((e) => {
+        if (!cancelled) {
+          setLoadError(
+            e instanceof Error ? e.message : 'No se pudieron cargar los productos',
+          )
+          setProducts([])
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const filtered = useMemo(
     () =>
@@ -39,7 +70,7 @@ export function Shop() {
         const okSize = sizeF === 'Todos' || p.size === sizeF
         return okColor && okStyle && okSize
       }),
-    [colorF, styleF, sizeF],
+    [products, colorF, styleF, sizeF],
   )
 
   const list = useMemo(
@@ -83,6 +114,12 @@ export function Shop() {
         Filtra por color, estilo y tamaño. Cada pieza muestra nombre y acceso directo a la historia.
       </p>
 
+      {loadError ? (
+        <p className="mb-8 rounded-2xl border border-red-900/40 bg-red-950/30 px-4 py-3 text-center text-sm text-red-200">
+          {loadError}
+        </p>
+      ) : null}
+
       <div className="mb-8 flex flex-wrap gap-2 sm:gap-3">
         {FILTERS.map((f) => (
           <label
@@ -95,6 +132,7 @@ export function Shop() {
               aria-label={`Filtro ${f.label}`}
               className="absolute inset-0 cursor-pointer rounded-full opacity-0"
               value={f.value}
+              disabled={loading}
               onChange={(e) => {
                 f.set(e.target.value)
                 setVisibleCount(8)
@@ -110,7 +148,11 @@ export function Shop() {
         ))}
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? (
+        <p className="rounded-2xl border border-zinc-800 bg-zinc-950/60 py-12 text-center text-sm text-zinc-500">
+          Cargando piezas…
+        </p>
+      ) : filtered.length === 0 ? (
         <p className="rounded-2xl border border-zinc-800 bg-zinc-950/60 py-12 text-center text-sm text-zinc-500">
           No hay peluches con esa combinación. Cambia los filtros.
         </p>
@@ -121,8 +163,7 @@ export function Shop() {
               key={p.slug}
               slug={p.slug}
               name={p.name}
-              price={p.price}
-              image={p.image}
+              product={p}
               showFavorite={false}
               shopActions
             />
@@ -133,7 +174,9 @@ export function Shop() {
       <div className="mx-auto mt-10 max-w-md pb-8 pt-2 lg:mt-12 lg:max-w-sm">
         <Button
           variant="outline"
-          disabled={visibleCount >= filtered.length || filtered.length === 0}
+          disabled={
+            loading || visibleCount >= filtered.length || filtered.length === 0
+          }
           onClick={() =>
             setVisibleCount((n) => Math.min(n + 4, filtered.length))
           }

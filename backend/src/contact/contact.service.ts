@@ -25,4 +25,24 @@ export class ContactService {
       id: String(doc._id),
     };
   }
+
+  async findAllForAdmin() {
+    const rows = await this.contactModel
+      .find()
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+    return rows.map((r) => {
+      const t = r as typeof r & { createdAt?: Date; updatedAt?: Date };
+      return {
+        id: String(r._id),
+        email: r.email,
+        message: r.message,
+        name: r.name,
+        subject: r.subject,
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+      };
+    });
+  }
 }
