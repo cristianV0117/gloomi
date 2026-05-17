@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -125,6 +126,23 @@ export class ProductsService implements OnModuleInit {
     if (body.color !== undefined) doc.color = body.color as ProductColor;
     if (body.style !== undefined) doc.style = body.style as ProductStyle;
     if (body.size !== undefined) doc.size = body.size as ProductSize;
+    if (body.images !== undefined) {
+      const current = [...(doc.images ?? [])];
+      const next = body.images;
+      if (next.length !== current.length) {
+        throw new BadRequestException(
+          'La galería debe mantener el mismo número de imágenes',
+        );
+      }
+      const sortedCurrent = [...current].sort((x, y) => x.localeCompare(y));
+      const sortedNext = [...next].sort((x, y) => x.localeCompare(y));
+      if (sortedCurrent.some((v, i) => v !== sortedNext[i])) {
+        throw new BadRequestException(
+          'Solo se permite reordenar las imágenes existentes',
+        );
+      }
+      doc.images = next;
+    }
     await doc.save();
     return this.toResponse(doc.toObject() as unknown as Record<string, unknown>);
   }

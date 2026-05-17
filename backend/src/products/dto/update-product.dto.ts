@@ -1,5 +1,7 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsIn,
   IsInt,
   IsNumber,
@@ -78,4 +80,11 @@ export class UpdateProductBodyDto {
   @IsString()
   @IsIn([...PRODUCT_SIZES])
   size?: string;
+
+  /** Reordenar galería: misma lista de rutas que las actuales, solo cambia el orden. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(16)
+  @IsString({ each: true })
+  images?: string[];
 }
