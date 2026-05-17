@@ -8,6 +8,30 @@ import { resolveMediaUrl } from '../lib/api'
 import { formatCop, formatUsd } from '../lib/productUtils'
 import { fetchProductBySlug } from '../lib/productsApi'
 
+const INSTAGRAM_PROFILE_URL = 'https://www.instagram.com/gl0omi__/'
+
+async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text)
+    return true
+  } catch {
+    try {
+      const ta = document.createElement('textarea')
+      ta.value = text
+      ta.setAttribute('readonly', '')
+      ta.style.position = 'fixed'
+      ta.style.left = '-9999px'
+      document.body.appendChild(ta)
+      ta.select()
+      const ok = document.execCommand('copy')
+      document.body.removeChild(ta)
+      return ok
+    } catch {
+      return false
+    }
+  }
+}
+
 function ProductImageLens({
   src,
   alt,
@@ -80,13 +104,14 @@ function ProductImageLens({
 
 export function ProductDetail() {
   const { t } = useTranslation()
-  const instagramProfileUrl = 'https://www.instagram.com/gl0omi__/'
-  const instagramDirectUrl = 'https://ig.me/m/gl0omi__'
   const { slug } = useParams()
   const navigate = useNavigate()
   const [product, setProduct] = useState<Product | null | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
   const [imgIndex, setImgIndex] = useState(0)
+  const [adoptUi, setAdoptUi] = useState<{ copyOk: boolean; message: string } | null>(
+    null,
+  )
 
   useEffect(() => {
     if (!slug) {
@@ -118,17 +143,48 @@ export function ProductDetail() {
     setImgIndex(0)
   }, [product?.slug])
 
+  useEffect(() => {
+    if (!adoptUi) return
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [adoptUi])
+
+  useEffect(() => {
+    if (!adoptUi) return
+    function onKey(ev: KeyboardEvent) {
+      if (ev.key === 'Escape') {
+        setAdoptUi(null)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [adoptUi])
+
   const slides = product?.images?.length ? product.images : []
   const activeSrc =
     slides.length > 0
       ? resolveMediaUrl(slides[Math.min(imgIndex, slides.length - 1)])
       : ''
 
-  function handleAdoptarClick() {
-    const opened = window.open(instagramDirectUrl, '_blank', 'noopener,noreferrer')
+  async function handleAdoptarClick() {
+    if (!product || adoptUi) return
+    const message = t('product.adoptClipboardMessage', { name: product.name })
+    const copyOk = await copyToClipboard(message)
+    setAdoptUi({ copyOk, message })
+  }
+
+  function continueToInstagramProfile() {
+    const opened = window.open(INSTAGRAM_PROFILE_URL, '_blank', 'noopener,noreferrer')
     if (!opened) {
-      window.location.assign(instagramProfileUrl)
+      window.location.assign(INSTAGRAM_PROFILE_URL)
     }
+    setAdoptUi(null)
+  }
+
+  function cancelAdoptModal() {
+    setAdoptUi(null)
   }
 
   if (product === undefined) {
@@ -162,7 +218,12 @@ export function ProductDetail() {
         <p>{formatUsd(product.priceUsd)}</p>
         <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{formatCop(product.priceCop)}</p>
       </div>
-      <Button variant="cta" className="mt-2 lg:max-w-none" onClick={handleAdoptarClick}>
+      <Button
+        variant="cta"
+        className="mt-2 lg:max-w-none"
+        onClick={() => void handleAdoptarClick()}
+        disabled={!!adoptUi}
+      >
         {t('product.adopt')}
       </Button>
       <Link
@@ -176,6 +237,61 @@ export function ProductDetail() {
 
   return (
     <div className="w-full pb-40 pt-4 sm:pt-6 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,480px)] lg:items-start lg:gap-12 lg:pb-12 xl:gap-16">
+      {adoptUi ? (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 p-4 backdrop-blur-[2px]"
+          role="presentation"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) cancelAdoptModal()
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="adopt-modal-title"
+            className="max-h-[min(90vh,32rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-700 dark:bg-zinc-950"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              id="adopt-modal-title"
+              className="font-display text-lg font-semibold tracking-wide text-zinc-900 dark:text-zinc-100"
+            >
+              {t('product.adoptModalTitle')}
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+              {adoptUi.copyOk ? t('product.adoptModalCopied') : t('product.adoptModalCopyFailed')}
+            </p>
+            {!adoptUi.copyOk ? (
+              <p className="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 font-mono text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100">
+                {adoptUi.message}
+              </p>
+            ) : (
+              <p className="mt-2 rounded-xl border border-zinc-100 bg-zinc-50/80 p-2 text-center text-xs text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
+                «{adoptUi.message}»
+              </p>
+            )}
+            <p className="mt-4 text-sm font-medium text-zinc-800 dark:text-zinc-200">
+              {t('product.adoptModalPasteHint')}
+            </p>
+            <Button
+              variant="cta"
+              type="button"
+              className="mt-6"
+              onClick={continueToInstagramProfile}
+            >
+              {t('product.adoptModalContinue')}
+            </Button>
+            <button
+              type="button"
+              onClick={cancelAdoptModal}
+              className="mt-3 w-full rounded-xl border border-zinc-300 py-3 text-sm font-medium text-zinc-800 transition hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-900"
+            >
+              {t('product.adoptModalCancel')}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="mb-6 lg:sticky lg:top-24 lg:mb-0">
         <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-white/70 ring-1 ring-[color:var(--color-gloom-violet-soft)] dark:border-zinc-800 dark:bg-zinc-950/40">
           <div className="relative aspect-square max-h-[min(90vw,44rem)] bg-zinc-100 dark:bg-zinc-900 lg:max-h-none">

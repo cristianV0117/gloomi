@@ -82,7 +82,14 @@
     "adopt": "Adopt",
     "prevImg": "Previous image",
     "nextImg": "Next image",
-    "dotAria": "View photo {{n}}"
+    "dotAria": "View photo {{n}}",
+    "adoptClipboardMessage": "Hi, I'd like to buy the Gloomi {{name}} 🖤",
+    "adoptModalTitle": "Ready for Instagram",
+    "adoptModalCopied": "We copied a message to your clipboard describing which Gloomi you want.",
+    "adoptModalCopyFailed": "We couldn’t copy automatically. Select and copy this text:",
+    "adoptModalPasteHint": "Tap “Continue” to open Gloomi’s Instagram profile. From there you can open a direct message and paste the text in the chat.",
+    "adoptModalContinue": "Continue to Instagram",
+    "adoptModalCancel": "Cancel"
   },
   "about": {
     "title": "Who we are",
