@@ -1,7 +1,9 @@
-import { Navigate, useLocation } from 'react-router-dom'
+import { Link, Navigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 
 export function RequireAdmin({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation()
   const { token, isAdmin } = useAuth()
   const location = useLocation()
 
@@ -14,9 +16,13 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
   if (!isAdmin) {
     return (
       <div className="py-16 text-center">
-        <p className="text-zinc-400">
-          Necesitas una cuenta administrador para acceder aquí.
-        </p>
+        <p className="mb-6 text-zinc-600 dark:text-zinc-400">{t('requireAdmin.title')}</p>
+        <Link
+          to="/admin/login"
+          className="text-sm font-medium text-[color:var(--color-gloom-violet)] hover:underline"
+        >
+          {t('requireAdmin.login')}
+        </Link>
       </div>
     )
   }

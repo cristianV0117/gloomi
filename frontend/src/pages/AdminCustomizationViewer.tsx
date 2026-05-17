@@ -58,7 +58,7 @@ export function AdminCustomizationViewer() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-3xl py-16 text-center text-sm text-zinc-500">
+      <div className="mx-auto max-w-3xl py-16 text-center text-sm text-zinc-600 dark:text-zinc-500">
         Cargando modelo…
       </div>
     )
@@ -67,7 +67,7 @@ export function AdminCustomizationViewer() {
   if (error || !row) {
     return (
       <div className="mx-auto max-w-3xl py-10">
-        <p className="rounded-lg border border-red-900/50 bg-red-950/40 px-4 py-3 text-sm text-red-200">
+        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
           {error ?? 'No encontrado'}
         </p>
         <Link
@@ -83,7 +83,7 @@ export function AdminCustomizationViewer() {
   if (!config) {
     return (
       <div className="mx-auto max-w-3xl py-10">
-        <p className="text-sm text-zinc-400">
+        <p className="text-sm text-zinc-700 dark:text-zinc-400">
           El diseño está guardado pero la configuración no es válida o está incompleta.
         </p>
         <Link
@@ -100,48 +100,48 @@ export function AdminCustomizationViewer() {
     <div className="mx-auto w-full max-w-3xl py-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-display mb-1 text-[11px] uppercase tracking-[0.35em] text-zinc-600">
+          <p className="font-display mb-1 text-[11px] uppercase tracking-[0.35em] text-zinc-600 dark:text-zinc-500">
             Solo visualización
           </p>
-          <h1 className="font-display text-2xl tracking-wide">
+          <h1 className="font-display text-2xl tracking-wide text-zinc-900 dark:text-zinc-100">
             Diseño guardado
           </h1>
-          <p className="mt-1 font-mono text-xs text-zinc-600">{row.id}</p>
-          <p className="mt-2 text-sm text-zinc-500">{formatWhen(row.createdAt)}</p>
+          <p className="mt-1 font-mono text-xs text-zinc-600 dark:text-zinc-500">{row.id}</p>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-500">{formatWhen(row.createdAt)}</p>
         </div>
         <Link
           to="/admin/personalizaciones"
-          className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-zinc-700 px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-900"
+          className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-900 shadow-sm hover:bg-zinc-50 dark:border-zinc-700 dark:bg-transparent dark:text-zinc-200 dark:shadow-none dark:hover:bg-zinc-900"
         >
           ← Listado
         </Link>
       </div>
 
-      <div className="mb-8 rounded-2xl border border-zinc-800 bg-zinc-950/40 p-5 text-sm">
+      <div className="mb-8 rounded-2xl border border-zinc-200 bg-white p-5 text-sm shadow-sm dark:border-zinc-800 dark:bg-zinc-950/40 dark:shadow-none">
         <dl className="grid gap-3 sm:grid-cols-2">
           <div>
-            <dt className="text-xs text-zinc-600">Nombre</dt>
-            <dd className="text-zinc-200">{row.name || '—'}</dd>
+            <dt className="text-xs text-zinc-600 dark:text-zinc-500">Nombre</dt>
+            <dd className="text-zinc-900 dark:text-zinc-100">{row.name || '—'}</dd>
           </div>
           <div>
-            <dt className="text-xs text-zinc-600">Correo</dt>
-            <dd className="text-zinc-200">{row.email || '—'}</dd>
+            <dt className="text-xs text-zinc-600 dark:text-zinc-500">Correo</dt>
+            <dd className="text-zinc-900 dark:text-zinc-100">{row.email || '—'}</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs text-zinc-600">Nota</dt>
-            <dd className="whitespace-pre-wrap text-zinc-300">{row.note || '—'}</dd>
+            <dt className="text-xs text-zinc-600 dark:text-zinc-500">Nota</dt>
+            <dd className="whitespace-pre-wrap text-zinc-800 dark:text-zinc-300">{row.note || '—'}</dd>
           </div>
         </dl>
-        <div className="mt-4 border-t border-zinc-800 pt-4 text-xs text-zinc-500">
+        <div className="mt-4 border-t border-zinc-200 pt-4 text-xs text-zinc-600 dark:border-zinc-800 dark:text-zinc-500">
           <p>
-            <span className="text-zinc-600">Criatura:</span>{' '}
+            <span className="text-zinc-700 dark:text-zinc-400">Criatura:</span>{' '}
             {creatureLabel ?? config.creatureId} ·{' '}
-            <span className="text-zinc-600">Ojos:</span> {eyeLabel ?? config.eyeId}
+            <span className="text-zinc-700 dark:text-zinc-400">Ojos:</span> {eyeLabel ?? config.eyeId}
             {' · '}
-            <span className="text-zinc-600">Telas:</span> cabeza {config.fabricByZone.head},
+            <span className="text-zinc-700 dark:text-zinc-400">Telas:</span> cabeza {config.fabricByZone.head},
             cuerpo {config.fabricByZone.body}, extremidades {config.fabricByZone.limbs}
             {' · '}
-            <span className="text-zinc-600">Sombrero / dije / alas / cola:</span>{' '}
+            <span className="text-zinc-700 dark:text-zinc-400">Sombrero / dije / alas / cola:</span>{' '}
             {config.hatId}, {config.charmId}, {config.wingKind},{' '}
             {config.tailAccentKind}
           </p>

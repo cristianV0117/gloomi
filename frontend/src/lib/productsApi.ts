@@ -92,7 +92,7 @@ export async function createProductWithImages(
 
 export async function updateProduct(
   slug: string,
-  patch: Partial<Omit<Product, 'images' | 'slug'>>,
+  patch: Partial<Omit<Product, 'slug'>>,
 ): Promise<Product> {
   const row = await apiFetch<ProductRow>(
     `/products/${encodeURIComponent(slug)}`,

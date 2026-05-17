@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { useTranslation } from 'react-i18next'
 import type {
   CharmKind,
   CreatureKind,
@@ -32,14 +33,6 @@ type Props = {
   className?: string
 }
 
-const CREATURE_LABEL_ES: Record<CreatureKind, string> = {
-  bear: 'oso',
-  cat: 'gato',
-  dog: 'perro',
-  mouse: 'ratón',
-  rabbit: 'conejo',
-}
-
 const plushStroke = {
   stroke: '#18181b',
   strokeOpacity: 0.2,
@@ -58,6 +51,7 @@ export function GloomiVector({
   tailAccent,
   className = '',
 }: Props) {
+  const { t } = useTranslation()
   const uid = useId().replace(/:/g, '')
   const { body: charmBodyHex } = fabricZones
   const cHead = svgFabricFill(uid, fabricByZone.head)
@@ -105,7 +99,9 @@ export function GloomiVector({
           viewBox="0 0 220 268"
           className="size-full max-h-[min(52vh,420px)] min-h-[260px] touch-none rounded-2xl sm:max-h-[min(56vh,460px)] sm:min-h-[300px]"
           role="img"
-          aria-label={`Ilustración vectorial del peluche (${CREATURE_LABEL_ES[creature]})`}
+          aria-label={t('customizer.vectorAria', {
+            creature: t(`customizer.creature.${creature}`).toLowerCase(),
+          })}
         >
           <defs>
             <linearGradient id={`${uid}-floor`} x1="0" y1="0" x2="0" y2="1">
@@ -174,7 +170,7 @@ export function GloomiVector({
         </svg>
       </div>
       <p className="mt-3 text-center text-[11px] text-zinc-500 sm:text-xs">
-        Vista vectorial (SVG) · Escala nítida en cualquier tamaño
+        {t('customizer.vectorCaption')}
       </p>
     </div>
   )

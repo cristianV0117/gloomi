@@ -2,6 +2,7 @@ import { Canvas } from '@react-three/fiber'
 import { ContactShadows, OrbitControls } from '@react-three/drei'
 import { DoubleSide } from 'three'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type {
   CharmKind,
   CreatureKind,
@@ -148,14 +149,6 @@ const CREATURE_RIGS: Record<CreatureKind, CreatureRig> = {
   },
 }
 
-const CREATURE_LABEL_ES: Record<CreatureKind, string> = {
-  bear: 'oso',
-  cat: 'gato',
-  dog: 'perro',
-  mouse: 'ratón',
-  rabbit: 'conejo',
-}
-
 /** Peluche en 3D: arrastra para orbitar (360°). Admite varias formas de animal. */
 export function GloomiBear3D({
   creature,
@@ -168,6 +161,7 @@ export function GloomiBear3D({
   tailAccent,
   className = '',
 }: Props) {
+  const { t } = useTranslation()
   return (
     <div className={`flex w-full flex-col ${className}`}>
       <div className="relative h-[min(52vh,400px)] w-full min-h-[280px] touch-none sm:h-[min(56vh,460px)] lg:min-h-[340px]">
@@ -180,7 +174,9 @@ export function GloomiBear3D({
             powerPreference: 'high-performance',
           }}
           className="size-full touch-none rounded-2xl"
-          aria-label={`Vista 3D del peluche (${CREATURE_LABEL_ES[creature]}). Arrastra para girar.`}
+          aria-label={t('customizer.threeDAria', {
+            creature: t(`customizer.creature.${creature}`).toLowerCase(),
+          })}
           role="img"
         >
           <ambientLight intensity={0.52} />
@@ -233,7 +229,7 @@ export function GloomiBear3D({
         </Canvas>
       </div>
       <p className="mt-3 text-center text-[11px] text-zinc-500 sm:text-xs">
-        Arrastra con el ratón o el dedo para girar el modelo · Rueda para acercar o alejar
+        {t('customizer.orbitHint')}
       </p>
     </div>
   )

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { CharmKind, DetailFocus, EyeKind, HatKind } from '../types'
 
 type Props = {
@@ -9,12 +10,6 @@ type Props = {
   onFocusChange: (f: DetailFocus) => void
 }
 
-const tabs: { id: DetailFocus; label: string }[] = [
-  { id: 'eyes', label: 'Ojos' },
-  { id: 'hat', label: 'Sombrero' },
-  { id: 'charm', label: 'Dije' },
-]
-
 export function CustomizerDetailInset({
   eyeKind,
   hat,
@@ -23,24 +18,37 @@ export function CustomizerDetailInset({
   focus,
   onFocusChange,
 }: Props) {
+  const { t } = useTranslation()
+  const tabs: { id: DetailFocus; label: string }[] = [
+    { id: 'eyes', label: t('detailInset.tabEyes') },
+    { id: 'hat', label: t('detailInset.tabHat') },
+    { id: 'charm', label: t('detailInset.tabCharm') },
+  ]
+  const caption =
+    focus === 'eyes'
+      ? t(`detailInset.eye.${eyeKind}`)
+      : focus === 'hat'
+        ? t(`detailInset.hat.${hat}`)
+        : t(`detailInset.charm.${charm}`)
+
   return (
     <div
       className="pointer-events-auto absolute right-2 top-2 z-20 w-[8.25rem] rounded-xl border border-[rgb(201_38_74_/0.4)] bg-[rgb(12_8_10_/0.92)] p-2 shadow-[0_12px_40px_-8px_rgb(120_18_38_/0.55)] backdrop-blur-md sm:right-3 sm:top-3 sm:w-[9.25rem]"
       role="region"
-      aria-label="Detalle ampliado de la selección"
+      aria-label={t('customizer.detailAria')}
     >
       <p className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.2em] text-zinc-500">
-        Zoom detalle
+        {t('detailInset.zoomTitle')}
       </p>
       <div className="mb-2 flex gap-0.5 rounded-lg bg-zinc-950/80 p-0.5">
-        {tabs.map((t) => (
+        {tabs.map((tab) => (
           <button
-            key={t.id}
+            key={tab.id}
             type="button"
-            onClick={() => onFocusChange(t.id)}
-            className={`flex-1 rounded-md px-1 py-1 text-[10px] font-medium transition sm:text-[11px] ${focus === t.id ? 'bg-[rgb(201_38_74_/0.35)] text-white shadow-inner' : 'text-zinc-500 hover:text-zinc-300'}`}
+            onClick={() => onFocusChange(tab.id)}
+            className={`flex-1 rounded-md px-1 py-1 text-[10px] font-medium transition sm:text-[11px] ${focus === tab.id ? 'bg-[rgb(201_38_74_/0.35)] text-white shadow-inner' : 'text-zinc-500 hover:text-zinc-300'}`}
           >
-            {t.label}
+            {tab.label}
           </button>
         ))}
       </div>
@@ -63,49 +71,10 @@ export function CustomizerDetailInset({
         </svg>
       </div>
       <p className="mt-1.5 truncate text-center text-[10px] leading-tight text-zinc-400">
-        {focus === 'eyes' && eyeLabel(eyeKind)}
-        {focus === 'hat' && hatLabel(hat)}
-        {focus === 'charm' && charmLabel(charm)}
+        {caption}
       </p>
     </div>
   )
-}
-
-function eyeLabel(k: EyeKind): string {
-  const m: Record<EyeKind, string> = {
-    round: 'Ojos redondos · bisel suave',
-    slit: 'Hendidura felina',
-    star: 'Estrella facetada · brillo',
-    heart: 'Corazón velvet',
-    spiral: 'Espiral hipnótica',
-    gem: 'Gema tallada',
-    button: 'Botones cosidos · Coraline',
-  }
-  return m[k]
-}
-
-function hatLabel(k: HatKind): string {
-  const m: Record<HatKind, string> = {
-    none: 'Sin sombrero',
-    mini: 'Mini copa negra',
-    tulle: 'Velo tul translúcido',
-    beanie: 'Gorro punto oscuro',
-    horns: 'Cuernitos resina',
-    bow: 'Lazo burdeos',
-  }
-  return m[k]
-}
-
-function charmLabel(k: CharmKind): string {
-  const m: Record<CharmKind, string> = {
-    moon: 'Dije luna · metal frío',
-    web: 'Telaraña grabada',
-    heart: 'Corazón oxidado',
-    sparkle: 'Estrella · Glitter Up',
-    skull: 'Calavera mini',
-    rose: 'Rosa marchita · barniz',
-  }
-  return m[k]
 }
 
 function EyeDetailArt({ kind }: { kind: EyeKind }) {

@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { RequireAdmin } from './components/RequireAdmin'
 import { AuthProvider } from './contexts/AuthContext'
+import { UiPreferencesProvider } from './contexts/UiPreferencesContext'
 import { About } from './pages/About'
 import { AdminContactMessages } from './pages/AdminContactMessages'
 import { AdminCreateGloomi } from './pages/AdminCreateGloomi'
@@ -21,10 +22,11 @@ import { Upcycling } from './pages/Upcycling'
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
+    <UiPreferencesProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="tienda" element={<Shop />} />
             <Route path="tienda/:slug" element={<ProductDetail />} />
@@ -87,5 +89,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </UiPreferencesProvider>
   )
 }
