@@ -9,6 +9,8 @@ lerna-debug.log*
 
 node_modules
 dist
+backend/tsconfig.build.tsbuildinfo
+backend/uploads
 dist-ssr
 *.local
 
